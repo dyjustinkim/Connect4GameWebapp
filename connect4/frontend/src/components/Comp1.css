@@ -1,0 +1,7 @@
+.buttons{
+  width: 100px;
+  height: 100px;
+  background-color: blue;
+  border-radius: 50%; /* Make the div circular */
+  cursor: pointer;
+}

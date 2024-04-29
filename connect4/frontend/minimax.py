@@ -1,4 +1,4 @@
-from connect4 import Connect4Board, IN_A_ROW
+from .connect4game import Connect4Board, IN_A_ROW
 import numpy as np
 import random
 
