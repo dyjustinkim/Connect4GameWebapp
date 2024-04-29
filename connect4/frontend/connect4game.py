@@ -6,10 +6,10 @@ COLUMNS    = 7
 IN_A_ROW = 4
 
 class Connect4Board:
-    def __init__(self,  board=None, rows=ROWS, columns=COLUMNS):
+    def __init__(self,  board=None, rows=ROWS, columns=COLUMNS, current_column=0, current_row=0):
         self.rows = rows
         self.columns = columns
-        self.current_column, self.current_row = 0, 0 
+        self.current_column, self.current_row = current_column, current_row
 
         if board is not None:
             # If a board state is provided, directly use it to create the new instance
@@ -20,6 +20,10 @@ class Connect4Board:
 
     def display(self):
         print(self.board)
+
+    def stats(self):
+        print(self.current_column, self.current_row)
+        print(self.board[0])
 
     def returnboard(self):
         return self.board

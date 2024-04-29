@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .minimax import minimax
 from .connect4game import Connect4Board
 import json
+import numpy as np
 
 # Create your views here.
 def index(request, *args, **kwargs):
@@ -27,3 +28,32 @@ def minimax_move(column):
     board = board.returnboard().tolist()
     jsonboard = json.dumps(board)
     return jsonboard
+
+@csrf_exempt
+def win(request):
+    if request.method == 'POST':
+        data=(json.loads(request.body))
+        bb = (data['board'])
+        row, col = int(data['row']), int(data['column']) 
+        piece = data['piece']
+        board1 = Connect4Board(board=bb, current_row=row, current_column=col)
+        won = board1.check_win(piece)
+        mystr = '{"response": "' + str(won) + '"}'
+        return JsonResponse(json.loads(mystr))
+
+    else:
+        return JsonResponse({'error': 'Unsupported method'}, status=405)
+    
+@csrf_exempt
+def aimove(request):
+    if request.method == 'POST':
+        data=(json.loads(request.body))
+        bb = (data['board'])
+        piece = data['piece']
+        board1 = Connect4Board(board=bb)
+        move = minimax(piece, board1)
+        mystr = '{"move": "' + str(move) + '"}'
+        return JsonResponse(json.loads(mystr))
+
+    else:
+        return JsonResponse({'error': 'Unsupported method'}, status=405)

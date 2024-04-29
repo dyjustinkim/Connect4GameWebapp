@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Slot } from "./Slot";
 
-
-
-
 export const Board = () => {
     const [board, setBoard] = useState([
         ['_', '_', '_', '_', '_', '_', '_'],
@@ -17,107 +14,147 @@ export const Board = () => {
     const [currPlayer, setCurrPlayer] = useState('x');
     const [oppPlayer, setOppPlayer] = useState('o');
     const [gameOver, setGameOver] = useState(false);
-
-
-    const checkWin = (row, column, ch) => {
-        try {
-            if (board[row + 1][column] === ch) {
-                if (board[row + 2][column] === ch) {
-                    if (board[row + 3][column] === ch) {
-                        return true;
-                    }
-                }
-            }
-        } catch (e) { console.log(e) }
-
-        try {
-            if (board[row + 1][column + 1] === ch) {
-                if (board[row + 2][column + 2] === ch) {
-                    if (board[row + 3][column + 3] === ch) {
-                        return true;
-                    }
-                }
-            }
-        } catch (e) { console.log(e) }
-
-        try {
-            if (board[row + 1][column - 1] === ch) {
-                if (board[row + 2][column - 2] === ch) {
-                    if (board[row + 3][column - 3] === ch) {
-                        return true;
-                    }
-                }
-            }
-        } catch (e) { console.log(e) }
-
-        try {
-            if (board[row][column + 1] === ch) {
-                if (board[row][column + 2] === ch) {
-                    if (board[row][column + 3] === ch) {
-                        return true;
-                    }
-                }
-            }
-        } catch (e) { console.log(e) }
-
-        try {
-            if (board[row][column - 1] === ch) {
-                if (board[row][column - 2] === ch) {
-                    if (board[row][column - 3] === ch) {
-                        return true;
-                    }
-                }
-            }
-        } catch (e) { console.log(e) }
-
-        try {
-            if (board[row - 1][column - 1] === ch) {
-                if (board[row - 2][column - 2] === ch) {
-                    if (board[row - 3][column - 3] === ch) {
-                        return true;
-                    }
-                }
-            }
-        } catch (e) { console.log(e) }
-
-        try {
-            if (board[row - 1][column + 1] === ch) {
-                if (board[row - 2][column + 2] === ch) {
-                    if (board[row - 3][column + 3] === ch) {
-                        return true;
-                    }
-                }
-            }
-        } catch (e) { console.log(e) }
-    };
-
+    
     const updateBoard = (row, column, ch) => {
         setBoard(prev => {
             const boardCopy = [...prev];
             boardCopy[row][column] = ch;
             return boardCopy;
         });
-        return checkWin(row, column, ch);
     };
 
+    async function checkWin(b1, r, c, p) {
+        const data1 = {
+            board: b1,
+            row: r,
+            column: c,
+            piece: p
+        }
+        try {
+            const response = await fetch('win', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data1)
+            })
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              const data = await response.json();
+              return data;
+            } catch (error) {
+              console.error('Error:', error);
+              throw error;
+            }
+         
+        }
 
-    const handleClick = (e) => {
+    async function getAIMove(b1, p) {
+        const data1 = {
+            board: b1,
+            piece: p
+        }
+        try {
+            const response = await fetch('aimove', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data1)
+            })
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              const data = await response.json();
+              return data;
+            } catch (error) {
+              console.error('Error:', error);
+              throw error;
+            }
+    }
+
+    async function handleClick(e) {
         const column = e.target.getAttribute('x');
         let row = board.findIndex((rowArr, index) => {
-            // Find the first row that is occupied or at the bottom of the board
             return (rowArr[column] !== '_' || (index === board.length - 1));
         });
-        // Only go up one row if the slot is NOT at the bottom
         if (row !== (board.length - 1)) row -= 1;
         if (board[row][column] !== '_') row -= 1;
 
+        updateBoard(row, column, currPlayer);
+        const boardCopy = board;
+        boardCopy[row][column] = currPlayer;
 
+        let flag = false
+        try {
+            const data = await checkWin(board, row, column, currPlayer).then(data => {
+                // Use the fetched data here
+                if (data["response"] ===  "True") {
+                    flag = true
+                }
+            })
+            .catch(error => {
+                // Handle any errors
+                console.error('Error:', error);
+            });
+            
+            setGameOver(flag);
+        }
+        catch (error) {
+            console.error('Error fetching data:', error);
+          }
 
-        setGameOver(updateBoard(row, column, currPlayer));
 
 
         if (!gameOver) {
-            // Swap players
+            const currPlayerCopy = currPlayer;
+            setCurrPlayer(oppPlayer);
+            setOppPlayer(currPlayerCopy);
+        }
+
+        let move = 0
+        try {
+            const data = await getAIMove(board, currPlayer).then(data => {
+                // Use the fetched data here
+                move = Number(data["move"])
+            })
+            .catch(error => {
+                // Handle any errors
+                console.error('Error:', error);
+            });
+                    }
+        catch (error) {
+            console.error('Error fetching data:', error);
+          }
+
+        let column2 = move
+        let row2 = board.findIndex((rowArr, index) => {
+            return (rowArr[column] !== '_' || (index === board.length - 1));
+        });
+        if (row !== (board.length - 1)) row -= 1;
+        if (board[row][column] !== '_') row -= 1;
+        updateBoard(row2, column2, currPlayer);
+
+        try {
+            const data = await checkWin(board, row, column, currPlayer).then(data => {
+                // Use the fetched data here
+                if (data["response"] ===  "True") {
+                    flag = true
+                }
+            })
+            .catch(error => {
+                // Handle any errors
+                console.error('Error:', error);
+            });
+            
+            setGameOver(flag);
+        }
+        catch (error) {
+            console.error('Error fetching data:', error);
+          }
+
+        if (!gameOver) {
             const currPlayerCopy = currPlayer;
             setCurrPlayer(oppPlayer);
             setOppPlayer(currPlayerCopy);
