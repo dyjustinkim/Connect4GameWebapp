@@ -38,6 +38,8 @@ def win(request):
         piece = data['piece']
         board1 = Connect4Board(board=bb, current_row=row, current_column=col)
         won = board1.check_win(piece)
+        board1.display()
+        print(won)
         mystr = '{"response": "' + str(won) + '"}'
         return JsonResponse(json.loads(mystr))
 
@@ -52,8 +54,12 @@ def aimove(request):
         piece = data['piece']
         board1 = Connect4Board(board=bb)
         move = minimax(piece, board1)
-        mystr = '{"move": "' + str(move) + '"}'
-        return JsonResponse(json.loads(mystr))
+        board1.drop_piece(move, piece)
+        rb = board1.returnboard().tolist()
+        won = board1.check_win(piece)
+        dict = {"nb": rb, "win": str(won)}
+        dict = json.dumps(dict)
+        return JsonResponse(json.loads(dict))
 
     else:
         return JsonResponse({'error': 'Unsupported method'}, status=405)

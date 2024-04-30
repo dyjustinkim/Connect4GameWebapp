@@ -7,3 +7,4 @@ django-webpack-loader
 python-dotenv
 numpy
 jsonfield
+random

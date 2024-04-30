@@ -2,7 +2,7 @@ from .connect4game import Connect4Board, IN_A_ROW
 import numpy as np
 import random
 
-TERMINAL = 4
+TERMINAL = 2
 
 def minimax(first_player, board, maxturn=True, target=0, curr_player=None):
     next_turn = False if maxturn == True else False

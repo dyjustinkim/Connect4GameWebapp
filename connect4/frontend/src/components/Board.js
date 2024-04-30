@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Slot } from "./Slot";
 
 export const Board = () => {
-    const [board, setBoard] = useState([
+    let [board, setBoard] = useState([
         ['_', '_', '_', '_', '_', '_', '_'],
         ['_', '_', '_', '_', '_', '_', '_'],
         ['_', '_', '_', '_', '_', '_', '_'],
@@ -11,18 +11,11 @@ export const Board = () => {
         ['_', '_', '_', '_', '_', '_', '_']
     ]);
 
-    const [currPlayer, setCurrPlayer] = useState('x');
-    const [oppPlayer, setOppPlayer] = useState('o');
-    const [gameOver, setGameOver] = useState(false);
+    let [currPlayer, setCurrPlayer] = useState('x');
+    let [oppPlayer, setOppPlayer] = useState('o');
+    let [victory, setVictory] = useState('_');
+    let [gameOver, setGameOver] = useState(false);
     
-    const updateBoard = (row, column, ch) => {
-        setBoard(prev => {
-            const boardCopy = [...prev];
-            boardCopy[row][column] = ch;
-            return boardCopy;
-        });
-    };
-
     async function checkWin(b1, r, c, p) {
         const data1 = {
             board: b1,
@@ -74,6 +67,36 @@ export const Board = () => {
             }
     }
 
+    async function AIMove() {
+        if (gameOver === false) {
+            try {
+                const data = await getAIMove(board, currPlayer).then(data => {
+                    // Use the fetched data here
+                    setBoard(data['nb'])
+                    if (data['win'] === "True") {
+                        setGameOver(true)
+                        setVictory(currPlayer)
+                    }
+                })
+                .catch(error => {
+                    // Handle any errors
+                    console.error('Error:', error);
+                });
+                        }
+            catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        if (!gameOver) {
+            // Swap players
+            const currPlayerCopy = currPlayer;
+            currPlayer = oppPlayer;
+            oppPlayer = currPlayerCopy;
+            }
+        }
+    }
+
+    
+
     async function handleClick(e) {
         const column = e.target.getAttribute('x');
         let row = board.findIndex((rowArr, index) => {
@@ -82,9 +105,7 @@ export const Board = () => {
         if (row !== (board.length - 1)) row -= 1;
         if (board[row][column] !== '_') row -= 1;
 
-        updateBoard(row, column, currPlayer);
-        const boardCopy = board;
-        boardCopy[row][column] = currPlayer;
+        board[row][column] = currPlayer;
 
         let flag = false
         try {
@@ -100,77 +121,38 @@ export const Board = () => {
             });
             
             setGameOver(flag);
+            if (flag === true) {
+                setVictory(currPlayer)
+                return
+            }
+
         }
         catch (error) {
             console.error('Error fetching data:', error);
           }
 
-
-
-        if (!gameOver) {
+        console.log(currPlayer)
+          if (!gameOver) {
+            // Swap players
             const currPlayerCopy = currPlayer;
-            setCurrPlayer(oppPlayer);
-            setOppPlayer(currPlayerCopy);
+            currPlayer = oppPlayer;
+            oppPlayer = currPlayer;
         }
 
-        let move = 0
-        try {
-            const data = await getAIMove(board, currPlayer).then(data => {
-                // Use the fetched data here
-                move = Number(data["move"])
-            })
-            .catch(error => {
-                // Handle any errors
-                console.error('Error:', error);
-            });
-                    }
-        catch (error) {
-            console.error('Error fetching data:', error);
-          }
 
-        let column2 = move
-        let row2 = board.findIndex((rowArr, index) => {
-            return (rowArr[column] !== '_' || (index === board.length - 1));
-        });
-        if (row !== (board.length - 1)) row -= 1;
-        if (board[row][column] !== '_') row -= 1;
-        updateBoard(row2, column2, currPlayer);
-
-        try {
-            const data = await checkWin(board, row, column, currPlayer).then(data => {
-                // Use the fetched data here
-                if (data["response"] ===  "True") {
-                    flag = true
-                }
-            })
-            .catch(error => {
-                // Handle any errors
-                console.error('Error:', error);
-            });
-            
-            setGameOver(flag);
-        }
-        catch (error) {
-            console.error('Error fetching data:', error);
-          }
-
-        if (!gameOver) {
-            const currPlayerCopy = currPlayer;
-            setCurrPlayer(oppPlayer);
-            setOppPlayer(currPlayerCopy);
-        }
-
+        AIMove()
+        
     };
 
 
     return (
         <>
             {gameOver && (
-                <h1>Game Over! {oppPlayer == 'x' ? 'Yellow' : 'Red'} Wins!</h1>
+                <h1>Game Over! {victory == 'x' ? 'Yellow' : 'Red'} Wins!</h1>
             )}
-            <h2 id='playerDisplay'>{currPlayer === 'x' ? 'Yellow' : 'Red'} Move</h2>
+            <h2 id='title'>Connect 4</h2>
             <div id='board'
-                onClick={gameOver ? null : handleClick}
+                onClick={gameOver ? null : (event) => { handleClick(event); ;}}
             >
 
                 {board.map((row, i) => {
