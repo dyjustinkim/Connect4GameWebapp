@@ -1,4 +1,4 @@
-#!/Users/justinkim/Documents/GitHub/Connect4Webpage/env/bin/python3.11
+#!/Users/justinkim/Documents/GitHub/Connect4Webpage/env/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
