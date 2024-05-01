@@ -1,7 +1,9 @@
 https://dyjustinkim2.pythonanywhere.com/
 
-To play, click a slot in the column that you want to place a token in and a token of your color will automatically be placed in the lowest open slot.
-The site is quite slow, so please wait a few seconds for the game board to reflect your move. The AI's move will also appear simultaneously.
+To play, click a slot in the column you want and a token will placed in the lowest empty slot.
+The site is quite slow, so please wait a few seconds for the game board to reflect your move. The AI's move will also appear simultaneously. 
+Don't double click, as this will skip moves.
+
 
 Acknowledgements:
 Thanks to Jinxin Zhao for adding some helper functions to connect4game.py.
