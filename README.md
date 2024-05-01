@@ -1,5 +1,3 @@
-Online site found here:
-
 https://dyjustinkim2.pythonanywhere.com/
 
 To play, click a slot in the column that you want to place a token in and a token of your color will automatically be placed in the lowest open slot.
